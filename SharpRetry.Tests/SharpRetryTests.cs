@@ -13,19 +13,19 @@ namespace SharpRetry.Tests {
         }
 
         [Fact]
-        public void Should_retry_1_time() {
+        public async Task Should_retry_1_time() {
             var caller = Policy.HandleResult<string>()
                                .RetryOnlyWhen(c => c.Result == "0")
                                .Retry(1)
                                .BuildCaller();
 
-            var response = caller.Call(() => _client.Request(1));
+            var response = await caller.CallAsync(() => _client.Request(1));
             Assert.Equal("1", response.Result);
             Assert.True(response.IsSuccess);
         }
 
         [Fact]
-        public void Should_call_onRetry() {
+        public async Task Should_call_onRetry() {
             var onRetry = 0;
             var caller = Policy.HandleResult<string>()
                                .RetryOnlyWhen(c => c.Result == "0")
@@ -33,13 +33,13 @@ namespace SharpRetry.Tests {
                                .OnRetry(c => { onRetry++; })
                                .BuildCaller();
 
-            var response = caller.Call(() => _client.Request(1));
+            var response = await caller.CallAsync(() => _client.Request(1));
             Assert.Equal("1", response.Result);
             Assert.Equal(1, onRetry);
         }
 
         [Fact]
-        public void Should_call_beforeEachCall() {
+        public async Task Should_call_beforeEachCallAsync() {
             var beforeEachCall = 0;
             var caller = Policy.HandleResult<string>()
                                .RetryOnlyWhen(c => true)
@@ -47,12 +47,12 @@ namespace SharpRetry.Tests {
                                .Retry(3)
                                .BuildCaller();
 
-            var response = caller.Call(() => _client.Request(1));
+            var response = await caller.CallAsync(() => _client.Request(1));
             Assert.Equal(4, beforeEachCall);
         }
 
         [Fact]
-        public void Should_call_beforeFirstCall() {
+        public async Task Should_call_beforeFirstCallAsync() {
             var beforeFirstCall = 0;
             var caller = Policy.HandleResult<string>()
                                .RetryOnlyWhen(c => true)
@@ -60,12 +60,12 @@ namespace SharpRetry.Tests {
                                .Retry(3)
                                .BuildCaller();
 
-            var response = caller.Call(() => _client.Request(1));
+            var response = await caller.CallAsync(() => _client.Request(1));
             Assert.Equal(1, beforeFirstCall);
         }
 
         [Fact]
-        public void Should_call_onSuccess() {
+        public async Task Should_call_onSuccess() {
             var onSuccess = 0;
             var caller = Policy.HandleResult<string>()
                                .RetryOnlyWhen(c => c.Calls == 4)
@@ -73,25 +73,25 @@ namespace SharpRetry.Tests {
                                .Retry(3)
                                .BuildCaller();
 
-            var response = caller.Call(() => _client.Request(1));
+            var response = await caller.CallAsync(() => _client.Request(1));
             Assert.Equal(1, onSuccess);
         }
 
         [Fact]
-        public void Should_fail_on_undesirable_result() {
+        public async Task Should_fail_on_undesirable_result() {
             var caller = Policy.HandleResult<string>()
                                .RetryOnlyWhen(c => c.Result != null)
                                .Retry(1)
                                .BuildCaller();
 
-            var response = caller.Call(() => _client.Request(1));
+            var response = await caller.CallAsync(() => _client.Request(1));
             Assert.Equal("1", response.Result);
             Assert.True(response.IsFailure);
             Assert.Equal(2, response.Calls);
         }
 
         [Fact]
-        public void Should_fail_on_exception() {
+        public async Task Should_fail_on_exception() {
             var exception = new Exception();
             _client.BeforeCallAction = i => throw exception;
 
@@ -99,14 +99,14 @@ namespace SharpRetry.Tests {
                                .Retry(1)
                                .BuildCaller();
 
-            var response = caller.Call(() => _client.Request(1));
+            var response = await caller.CallAsync(() => _client.Request(1));
             Assert.Null(response.Result);
-            Assert.Equal(exception, response.LastException);
+            Assert.Equal(exception, response.Exception);
             Assert.True(response.IsFailure);
         }
 
         [Fact]
-        public void Should_recover_from_exception() {
+        public async Task Should_recover_from_exception() {
             _client.BeforeCallAction = call => {
                 if (call == 0) {
                     throw new Exception();
@@ -117,24 +117,24 @@ namespace SharpRetry.Tests {
                                .Retry(1)
                                .BuildCaller();
 
-            var response = caller.Call(() => _client.Request(0));
+            var response = await caller.CallAsync(() => _client.Request(0));
             Assert.Equal("1", response.Result);
-            Assert.Null(response.LastException);
+            Assert.Null(response.Exception);
             Assert.True(response.IsSuccess);
         }
 
         [Fact]
-        public void Should_retry_1_time_for_actions() {
+        public async Task Should_retry_1_time_for_actions() {
             var caller = Policy.Handle()
                                .Retry(1)
                                .BuildCaller();
 
-            var response = caller.Call(() => _client.RequestAction(1));
+            var response = await caller.CallAsync(() => _client.RequestAction(1));
             Assert.True(response.IsSuccess);
         }
 
         [Fact]
-        public void All_together() {
+        public async Task All_together() {
             var beforeFirstCall = 0;
             var beforeEachCall = 0;
             var retries = 0;
@@ -150,7 +150,7 @@ namespace SharpRetry.Tests {
                                .OnFailure(c => failure++)
                                .BuildCaller();
 
-            var response = caller.Call(() => _client.RequestAction(1));
+            var response = await caller.CallAsync(() => _client.RequestAction(1));
             Assert.True(response.IsSuccess);
             Assert.Equal(beforeFirstCall, 1);
             Assert.Equal(beforeEachCall, 4);
@@ -165,19 +165,16 @@ namespace SharpRetry.Tests {
 
         public Action<int> BeforeCallAction { get; set; } = call => { };
         
-        public string Request(int foo) {
+        public async Task<string> Request(int foo) {
             Calls++;
             BeforeCallAction(Calls-1);
-            return (Calls - 1).ToString();
+            return await Task.FromResult((Calls - 1).ToString());
         }
 
-        public void RequestAction(int foo) {
+        public async Task RequestAction(int foo) {
             Calls++;
             BeforeCallAction(Calls - 1);
-        }
-
-        public async Task<string> RequestAsync(int foo) {
-            return await Task.FromResult(Request(foo));
+            await Task.CompletedTask;
         }
     }
 }

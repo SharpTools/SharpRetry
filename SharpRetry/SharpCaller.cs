@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 
 namespace SharpRetry {
     public class SharpCaller<T> : ISharpCaller<T> {
@@ -8,24 +9,25 @@ namespace SharpRetry {
             _policy = policy;
         }
 
-        public Context<T> Call(Action call, string name = null) {
-            return Call(() => {
-                call.Invoke();
+        public async Task<Context<T>> CallAsync(Func<Task> call, string name = null) {
+            return await CallAsync(async () => {
+                await call.Invoke();
                 return default(T);
             }, name);
         }
 
-        public Context<T> Call(Func<T> call, string name = null) {
+        public async Task<Context<T>> CallAsync(Func<Task<T>> asyncCall, string name = null) {
             var context = new Context<T>(name);
             var tries = _policy.WaitTimes.Length + 1;
             for (var i = 0; i < tries; i++) {
                 if (i > 0) {
+                    await Task.Delay(_policy.WaitTimes[i - 1]);
                     _policy.OnRetryAction(context);
                 }
                 else {
                     _policy.BeforeFirstCallAction?.Invoke(context);
                 }
-                Call(call, context);
+                await CallAsync(asyncCall, context);
                 if (!_policy.RetryFilter(context)) {
                     break;
                 }
@@ -40,16 +42,16 @@ namespace SharpRetry {
             return context;
         }
 
-        private void Call(Func<T> call, Context<T> context) {
+        private async Task CallAsync(Func<Task<T>> call, Context<T> context) {
             _policy.BeforeEachCallAction?.Invoke(context);
             try {
-                var result = call.Invoke();
-                context.LastException = null;
+                var result = await call.Invoke();
+                context.Exception = null;
                 context.Result = result;
                 context.IsSuccess = true;
             }
             catch (Exception ex) {
-                context.LastException = ex;
+                context.Exception = ex;
                 context.IsSuccess = false;
             }
             context.Calls++;

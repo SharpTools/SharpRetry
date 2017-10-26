@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 
 namespace SharpRetry {
     public interface ISharpCaller<T> {
-        Context<T> Call(Action call, string name = null);
-        Context<T> Call(Func<T> call, string name = null);
+        Task<Context<T>> CallAsync(Func<Task> call, string name = null);
+        Task<Context<T>> CallAsync(Func<Task<T>> asyncCall, string name = null);
     }
 }

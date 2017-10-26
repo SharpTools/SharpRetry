@@ -1,7 +1,14 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFramework>netstandard1.3</TargetFramework>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Authors>Andre Carlucci</Authors>
+    <Company>Andre Carlucci</Company>
+    <PackageLicenseUrl>https://github.com/SharpTools/SharpRetry/blob/master/LICENSE</PackageLicenseUrl>
+    <PackageProjectUrl>https://github.com/SharpTools/SharpRetry</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/SharpTools/SharpRetry.git</RepositoryUrl>
+    <Version>1.0.0-beta</Version>
   </PropertyGroup>
 
 </Project>
