@@ -8,9 +8,10 @@
     <PackageLicenseUrl>https://github.com/SharpTools/SharpRetry/blob/master/LICENSE</PackageLicenseUrl>
     <PackageProjectUrl>https://github.com/SharpTools/SharpRetry</PackageProjectUrl>
     <RepositoryUrl>https://github.com/SharpTools/SharpRetry.git</RepositoryUrl>
-    <Version>1.0.0-beta2</Version>
+    <Version>1.0.0-beta3</Version>
     <PackageTags>retry, fallback, retrypolicy, policy, resilience, exception, sharpretry, exceptions, tests</PackageTags>
     <Description>SharpRetry is a simple and powerful library to create retry policies for your .net application. Create a policy once and use it everywhere in your system to make async calls in an easy and unit testable way.</Description>
+    <PackageIconUrl>https://avatars.githubusercontent.com/u/14256180</PackageIconUrl>
   </PropertyGroup>
 
 </Project>
