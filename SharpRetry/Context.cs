@@ -7,6 +7,17 @@ namespace SharpRetry {
         public string CallName { get; set; }
         public int Calls { get; set; }
         public Exception Exception { get; set; }
+        public DateTime? CallBegin { get; set; }
+        public DateTime? CallEnd { get; set; }
+        public TimeSpan? CallDuration {
+            get {
+                if(CallBegin == null || CallEnd == null) {
+                    return null;
+                }
+                return CallEnd - CallBegin;
+            }
+        }
+
         public T Result { get; set; }
 
         public Context() { }

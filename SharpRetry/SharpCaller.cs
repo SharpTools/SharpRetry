@@ -43,8 +43,10 @@ namespace SharpRetry {
         }
 
         private async Task CallAsync(Func<Task<T>> call, Context<T> context) {
+            context.Calls++;
             _policy.BeforeEachCallAction?.Invoke(context);
             try {
+                context.CallBegin = DateTime.Now;
                 var result = await call.Invoke();
                 context.Exception = null;
                 context.Result = result;
@@ -54,7 +56,7 @@ namespace SharpRetry {
                 context.Exception = ex;
                 context.IsSuccess = false;
             }
-            context.Calls++;
+            context.CallEnd = DateTime.Now;
         }
     }
 }

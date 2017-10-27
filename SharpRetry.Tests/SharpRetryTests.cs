@@ -106,6 +106,23 @@ namespace SharpRetry.Tests {
         }
 
         [Fact]
+        public async Task Bug_When_failure_dont_call_onSuccess() {
+            var exception = new Exception();
+            _client.BeforeCallAction = i => throw exception;
+            var onSuccess = 0;
+            var caller = Policy.HandleResult<string>()
+                               .Retry(1)
+                               .OnSuccess(c => onSuccess++)
+                               .BuildCaller();
+
+            var response = await caller.CallAsync(() => _client.Request(1));
+            Assert.Null(response.Result);
+            Assert.Equal(exception, response.Exception);
+            Assert.True(response.IsFailure);
+            Assert.Equal(0, onSuccess);
+        }
+
+        [Fact]
         public async Task Should_recover_from_exception() {
             _client.BeforeCallAction = call => {
                 if (call == 0) {
