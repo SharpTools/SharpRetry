@@ -1,5 +1,4 @@
 using System;
-using System.Net.Http;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -14,8 +13,8 @@ namespace SharpRetry.Tests {
 
         [Fact]
         public async Task Should_retry_1_time() {
-            var caller = Policy.HandleResult<string>()
-                               .RetryOnlyWhen(c => c.Result == "0")
+            var caller = Policy.Handle()
+                               .RetryOnlyWhen(c => c.CastResult<string>() == "0")
                                .Retry(1)
                                .BuildCaller();
 
@@ -27,8 +26,8 @@ namespace SharpRetry.Tests {
         [Fact]
         public async Task Should_call_onRetry() {
             var onRetry = 0;
-            var caller = Policy.HandleResult<string>()
-                               .RetryOnlyWhen(c => c.Result == "0")
+            var caller = Policy.Handle()
+                               .RetryOnlyWhen(c => c.CastResult<string>() == "0")
                                .Retry(1)
                                .OnRetry(c => { onRetry++; })
                                .BuildCaller();
@@ -41,7 +40,7 @@ namespace SharpRetry.Tests {
         [Fact]
         public async Task Should_call_beforeEachCallAsync() {
             var beforeEachCall = 0;
-            var caller = Policy.HandleResult<string>()
+            var caller = Policy.Handle()
                                .RetryOnlyWhen(c => true)
                                .BeforeEachCall(c => beforeEachCall++)
                                .Retry(3)
@@ -54,7 +53,7 @@ namespace SharpRetry.Tests {
         [Fact]
         public async Task Should_call_beforeFirstCallAsync() {
             var beforeFirstCall = 0;
-            var caller = Policy.HandleResult<string>()
+            var caller = Policy.Handle()
                                .RetryOnlyWhen(c => true)
                                .BeforeFirstCall(c => beforeFirstCall++)
                                .Retry(3)
@@ -67,7 +66,7 @@ namespace SharpRetry.Tests {
         [Fact]
         public async Task Should_call_onSuccess() {
             var onSuccess = 0;
-            var caller = Policy.HandleResult<string>()
+            var caller = Policy.Handle()
                                .RetryOnlyWhen(c => c.Calls == 4)
                                .OnSuccess(c => onSuccess++)
                                .Retry(3)
@@ -79,7 +78,7 @@ namespace SharpRetry.Tests {
 
         [Fact]
         public async Task Should_fail_on_undesirable_result() {
-            var caller = Policy.HandleResult<string>()
+            var caller = Policy.Handle()
                                .RetryOnlyWhen(c => c.Result != null)
                                .Retry(1)
                                .BuildCaller();
@@ -95,7 +94,7 @@ namespace SharpRetry.Tests {
             var exception = new Exception();
             _client.BeforeCallAction = i => throw exception;
 
-            var caller = Policy.HandleResult<string>()
+            var caller = Policy.Handle()
                                .Retry(1)
                                .BuildCaller();
 
@@ -110,7 +109,7 @@ namespace SharpRetry.Tests {
             var exception = new Exception();
             _client.BeforeCallAction = i => throw exception;
             var onSuccess = 0;
-            var caller = Policy.HandleResult<string>()
+            var caller = Policy.Handle()
                                .Retry(1)
                                .OnSuccess(c => onSuccess++)
                                .BuildCaller();
@@ -130,7 +129,7 @@ namespace SharpRetry.Tests {
                 }
             };
 
-            var caller = Policy.HandleResult<string>()
+            var caller = Policy.Handle()
                                .Retry(1)
                                .BuildCaller();
 
@@ -157,7 +156,7 @@ namespace SharpRetry.Tests {
             var retries = 0;
             var success = 0;
             var failure = 0;
-            var caller = Policy.HandleResult<string>()
+            var caller = Policy.Handle()
                                .BeforeFirstCall(c => beforeFirstCall++)
                                .BeforeEachCall(c=> beforeEachCall++)
                                .RetryOnlyWhen(c => c.Calls <= 3)

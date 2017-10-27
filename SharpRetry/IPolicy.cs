@@ -1,16 +1,16 @@
 ﻿using System;
 
 namespace SharpRetry {
-    public interface IPolicy<T> {
-        IPolicy<T> BeforeEachCall(Action<Context<T>> beforeEachCallAction);
-        IPolicy<T> BeforeFirstCall(Action<Context<T>> beforeFirstCallAction);
-        ISharpCaller<T> BuildCaller();
-        IPolicy<T> OnRetry(Action<Context<T>> onRetryAction);
-        IPolicy<T> OnSuccess(Action<Context<T>> onSuccessAction);
-        IPolicy<T> OnFailure(Action<Context<T>> onFailureAction);
-        IPolicy<T> Retry(int times);
-        IPolicy<T> RetryAndWait(params TimeSpan[] waitTimes);
-        IPolicy<T> RetryAndWaitInSeconds(params int[] waitInSeconds);
-        IPolicy<T> RetryOnlyWhen(Func<Context<T>, bool> filter);
+    public interface IPolicy {
+        IPolicy BeforeEachCall(Action<Context> beforeEachCallAction);
+        IPolicy BeforeFirstCall(Action<Context> beforeFirstCallAction);
+        ISharpCaller BuildCaller();
+        IPolicy OnRetry(Action<Context> onRetryAction);
+        IPolicy OnSuccess(Action<Context> onSuccessAction);
+        IPolicy OnFailure(Action<Context> onFailureAction);
+        IPolicy Retry(int times);
+        IPolicy RetryAndWait(params TimeSpan[] waitTimes);
+        IPolicy RetryAndWaitInSeconds(params int[] waitInSeconds);
+        IPolicy RetryOnlyWhen(Func<Context, bool> filter);
     }
 }

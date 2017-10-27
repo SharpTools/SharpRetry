@@ -1,7 +1,7 @@
 ﻿using System;
 
 namespace SharpRetry {
-    public class Context<T> {
+    public class Context {
         public bool IsFailure => !IsSuccess;
         public bool IsSuccess { get; set; }
         public string CallName { get; set; }
@@ -18,7 +18,11 @@ namespace SharpRetry {
             }
         }
 
-        public T Result { get; set; }
+        public object Result { get; set; }
+
+        public T CastResult<T>() {
+            return (T)Result;
+        }
 
         public Context() { }
 

@@ -2,22 +2,22 @@
 using System.Threading.Tasks;
 
 namespace SharpRetry {
-    public class SharpCaller<T> : ISharpCaller<T> {
-        private Policy<T> _policy;
+    public class SharpCaller : ISharpCaller {
+        private Policy _policy;
 
-        public SharpCaller(Policy<T> policy) {
+        public SharpCaller(Policy policy) {
             _policy = policy;
         }
 
-        public async Task<Context<T>> CallAsync(Func<Task> call, string name = null) {
-            return await CallAsync(async () => {
-                await call.Invoke();
-                return default(T);
+        public async Task<Context> CallAsync(Func<Task> asyncCall, string name = null) {
+            return await CallAsync<NoReturn>(async () => {
+                await asyncCall.Invoke();
+                return null;
             }, name);
         }
 
-        public async Task<Context<T>> CallAsync(Func<Task<T>> asyncCall, string name = null) {
-            var context = new Context<T>(name);
+        public async Task<Context> CallAsync<T>(Func<Task<T>> asyncCall, string name = null) {
+            var context = new Context(name);
             var tries = _policy.WaitTimes.Length + 1;
             for (var i = 0; i < tries; i++) {
                 if (i > 0) {
@@ -42,7 +42,7 @@ namespace SharpRetry {
             return context;
         }
 
-        private async Task CallAsync(Func<Task<T>> call, Context<T> context) {
+        private async Task CallAsync<T>(Func<Task<T>> call, Context context) {
             context.Calls++;
             _policy.BeforeEachCallAction?.Invoke(context);
             try {
@@ -58,5 +58,7 @@ namespace SharpRetry {
             }
             context.CallEnd = DateTime.Now;
         }
+
+        private class NoReturn {}
     }
 }
