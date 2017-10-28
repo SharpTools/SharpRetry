@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Threading.Tasks;
 
 namespace SharpRetry {
@@ -9,15 +10,15 @@ namespace SharpRetry {
             _policy = policy;
         }
 
-        public async Task<Context> CallAsync(Func<Task> asyncCall, string name = null) {
+        public async Task<Context> CallAsync(Func<Task> asyncCall, object name = null) {
             return await CallAsync<NoReturn>(async () => {
                 await asyncCall.Invoke();
                 return null;
             }, name);
         }
 
-        public async Task<Context> CallAsync<T>(Func<Task<T>> asyncCall, string name = null) {
-            var context = new Context(name);
+        public async Task<Context> CallAsync<T>(Func<Task<T>> asyncCall, object userdata = null) {
+            var context = new Context(userdata);
             var tries = _policy.WaitTimes.Length + 1;
             for (var i = 0; i < tries; i++) {
                 if (i > 0) {
@@ -45,8 +46,9 @@ namespace SharpRetry {
         private async Task CallAsync<T>(Func<Task<T>> call, Context context) {
             context.Calls++;
             _policy.BeforeEachCallAction?.Invoke(context);
+            var sw = new Stopwatch();
             try {
-                context.CallBegin = DateTime.Now;
+                sw.Start();
                 var result = await call.Invoke();
                 context.Exception = null;
                 context.Result = result;
@@ -56,7 +58,7 @@ namespace SharpRetry {
                 context.Exception = ex;
                 context.IsSuccess = false;
             }
-            context.CallEnd = DateTime.Now;
+            context.CallDuration = sw.Elapsed;
         }
 
         private class NoReturn {}

@@ -24,6 +24,21 @@ namespace SharpRetry.Tests {
         }
 
         [Fact]
+        public async Task Should_use_userdata() {
+            var name = "";
+            var caller = Policy.Handle()
+                               .RetryOnlyWhen(c => c.CastResult<string>() == "0")
+                               .Retry(1)
+                               .OnSuccess(c => name = c.Userdata.ToString())
+                               .BuildCaller();
+
+            var response = await caller.CallAsync(() => _client.Request(1), "foo" );
+            Assert.Equal("1", response.Result);
+            Assert.Equal("foo", name);
+            Assert.True(response.IsSuccess);
+        }
+
+        [Fact]
         public async Task Should_call_onRetry() {
             var onRetry = 0;
             var caller = Policy.Handle()
