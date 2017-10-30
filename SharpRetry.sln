@@ -3,9 +3,14 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.27009.1
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharpRetry", "SharpRetry\SharpRetry.csproj", "{0C53A3D8-2BFD-4E87-BD11-AACD21A4ED94}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharpRetry", "SharpRetry\SharpRetry.csproj", "{0C53A3D8-2BFD-4E87-BD11-AACD21A4ED94}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharpRetry.Tests", "SharpRetry.Tests\SharpRetry.Tests.csproj", "{9DAD793A-BBF6-4178-8E22-E5A36CA6B168}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharpRetry.Tests", "SharpRetry.Tests\SharpRetry.Tests.csproj", "{9DAD793A-BBF6-4178-8E22-E5A36CA6B168}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Docs", "Docs", "{CBBA0D74-3A23-47BC-A8E9-004DACFA87E0}"
+	ProjectSection(SolutionItems) = preProject
+		README.md = README.md
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
